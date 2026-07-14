@@ -26,6 +26,48 @@ if "report_data" not in st.session_state:
 if "commits_count" not in st.session_state:
     st.session_state.commits_count = 0
 
+# ========== 辅助函数：显示周报（必须放在最前面） ==========
+def display_report(data):
+    """统一展示周报的组件"""
+    col1, col2 = st.columns([4, 1])
+    with col1:
+        st.subheader("📋 本周周报")
+    with col2:
+        # 复制按钮
+        report_text = f"""
+📅 周报概览：{data.get('重点成果', data.get('week_summary', '未命名周报'))}
+
+✅ 本周工作：
+{chr(10).join(['- ' + item for item in data.get('本周工作', data.get('details', []))])}
+
+🚀 下周计划：{data.get('下周计划', data.get('next_plan', '未指定'))}
+        """
+        st.download_button(
+            label="📋 复制周报",
+            data=report_text,
+            file_name=f"周报_{datetime.now().strftime('%Y%m%d')}.md",
+            mime="text/markdown",
+            use_container_width=True
+        )
+    
+    # 重点成果（蓝色信息框）
+    summary = data.get("重点成果", data.get("week_summary", "未命名周报"))
+    st.info(f"📌 **整体总结**：{summary}")
+    
+    # 本周工作（绿色成功框）
+    details = data.get("本周工作", data.get("details", []))
+    if details:
+        st.success("✅ **本周工作**")
+        for item in details:
+            st.write(f"- {item}")
+    
+    # 下周计划（黄色警告框）
+    next_plan = data.get("下周计划", data.get("next_plan", "未指定"))
+    st.warning(f"🚀 **下周计划**：{next_plan}")
+    
+    # 显示生成时间
+    st.caption(f"🕐 生成时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+
 # ========== 页头 ==========
 st.title("📊 AI 周报生成器")
 st.markdown("> ✨ 输入 GitHub 仓库，AI 自动生成本周工作报告，让你的团队协作一目了然。")
@@ -142,46 +184,3 @@ if generate_btn:
 # ========== 页脚 ==========
 st.divider()
 st.caption("💡 提示：确保 .env 文件已配置 DEEPSEEK_API_KEY 和 GITHUB_TOKEN")
-
-
-# ========== 辅助函数：显示周报 ==========
-def display_report(data):
-    """统一展示周报的组件"""
-    col1, col2 = st.columns([4, 1])
-    with col1:
-        st.subheader("📋 本周周报")
-    with col2:
-        # 复制按钮
-        report_text = f"""
-📅 周报概览：{data.get('重点成果', data.get('week_summary', '未命名周报'))}
-
-✅ 本周工作：
-{chr(10).join(['- ' + item for item in data.get('本周工作', data.get('details', []))])}
-
-🚀 下周计划：{data.get('下周计划', data.get('next_plan', '未指定'))}
-        """
-        st.download_button(
-            label="📋 复制周报",
-            data=report_text,
-            file_name=f"周报_{datetime.now().strftime('%Y%m%d')}.md",
-            mime="text/markdown",
-            use_container_width=True
-        )
-    
-    # 重点成果（蓝色信息框）
-    summary = data.get("重点成果", data.get("week_summary", "未命名周报"))
-    st.info(f"📌 **整体总结**：{summary}")
-    
-    # 本周工作（绿色成功框）
-    details = data.get("本周工作", data.get("details", []))
-    if details:
-        st.success("✅ **本周工作**")
-        for item in details:
-            st.write(f"- {item}")
-    
-    # 下周计划（黄色警告框）
-    next_plan = data.get("下周计划", data.get("next_plan", "未指定"))
-    st.warning(f"🚀 **下周计划**：{next_plan}")
-    
-    # 显示生成时间
-    st.caption(f"🕐 生成时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
